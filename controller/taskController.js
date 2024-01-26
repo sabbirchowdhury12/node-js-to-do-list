@@ -64,3 +64,25 @@ module.exports.deleteTask = async (req, res, next) => {
     next();
   }
 };
+
+module.exports.updateTask = async (req, res, next) => {
+  try {
+    const data = req.body;
+    const { id } = req.params;
+    const result = await Task.updateOne({ _id: id }, data);
+    if (result) {
+      return res.status(200).json({
+        status: true,
+        message: "task update successfully",
+        result: result,
+      });
+    } else {
+      return res
+        .status(400)
+        .json({ status: false, message: "something wrong. try again" });
+    }
+  } catch (err) {
+    console.log(err);
+    next();
+  }
+};
