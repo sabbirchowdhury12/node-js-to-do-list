@@ -3,10 +3,9 @@ const { ObjectId } = require("mongoose").Types;
 
 module.exports.addTask = async (req, res, next) => {
   try {
-    const { title, description } = req.body;
+    const task = req.body;
     const result = await Task.create({
-      title,
-      description,
+      ...task,
     });
     if (result) {
       return res.status(200).json({
@@ -70,7 +69,7 @@ module.exports.updateTask = async (req, res, next) => {
     const data = req.body;
     const { id } = req.params;
     const result = await Task.updateOne({ _id: id }, data);
-    if (result) {
+    if (result.acknowledged) {
       return res.status(200).json({
         status: true,
         message: "task update successfully",
@@ -84,5 +83,44 @@ module.exports.updateTask = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     next();
+  }
+};
+
+module.exports.completeTask = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    //check is it already complete
+
+    const task = await Task.findOne({ _id: id });
+
+    if (task.complete) {
+      return res.json({ status: true, message: "Task already completed" });
+    }
+
+    const result = await Task.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { complete: true } }
+    );
+
+    if (result.acknowledged) {
+      return res.status(200).json({
+        status: true,
+        message: "Task updated successfully",
+        result: result,
+      });
+    } else {
+      return res.status(404).json({
+        status: false,
+        message: "something wrong try again.",
+      });
+    }
+  } catch (error) {
+    console.error("Error completing task:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
