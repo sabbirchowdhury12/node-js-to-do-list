@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 const taskRouter = require("./router/taskRoutes");
 const port = 5000;
+const MONGO_URL = "mongodb://127.0.0.1:27017/todo-list";
 
 // middleware
 app.use(express.json());
@@ -18,7 +19,7 @@ app.use("/task", taskRouter);
 
 app.listen(port, async () => {
   await mongoose
-    .connect("mongodb://127.0.0.1:27017/todo-list")
+    .connect(MONGO_URL)
     .then((res) => console.log("database connect successfully"))
     .catch((err) => console.log(err));
   console.log(`app listening on port ${port}`);
