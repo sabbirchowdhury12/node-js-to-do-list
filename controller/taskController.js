@@ -4,6 +4,14 @@ const { ObjectId } = require("mongoose").Types;
 module.exports.addTask = async (req, res, next) => {
   try {
     const task = req.body;
+
+    // Validate task data
+    if (!task.title || task.title.trim() === "") {
+      return res.status(400).json({
+        status: false,
+        message: "Requird task tile or Task title cannot be empty",
+      });
+    }
     const result = await Task.create({
       ...task,
     });
