@@ -1,4 +1,5 @@
 const Task = require("../model/taskModel");
+const { sendResponse } = require("../utils/sendResponse");
 const { ObjectId } = require("mongoose").Types;
 
 module.exports.addTask = async (req, res, next) => {
@@ -7,24 +8,20 @@ module.exports.addTask = async (req, res, next) => {
 
     // Validate task data
     if (!task.title || task.title.trim() === "") {
-      return res.status(400).json({
-        status: false,
-        message: "Requird task tile or Task title cannot be empty",
-      });
+      return sendResponse(
+        res,
+        404,
+        false,
+        "Requird task tile or Task title cannot be empty"
+      );
     }
     const result = await Task.create({
       ...task,
     });
     if (result) {
-      return res.status(200).json({
-        status: true,
-        message: "task add successfully",
-        result: result,
-      });
+      return sendResponse(res, 200, true, "task add successfully", result);
     } else {
-      return res
-        .status(400)
-        .json({ status: false, message: "something wrong. try again" });
+      return sendResponse(res, 404, false, "something wrong. try again");
     }
   } catch (err) {
     console.log(err);
@@ -35,15 +32,9 @@ module.exports.getAllTask = async (req, res, next) => {
   try {
     const result = await Task.find({});
     if (result) {
-      return res.status(200).json({
-        status: true,
-        message: "task fetched successfully",
-        result: result,
-      });
+      return sendResponse(res, 200, true, "task fetched successfully", result);
     } else {
-      return res
-        .status(400)
-        .json({ status: false, message: "something wrong. try again" });
+      return sendResponse(res, 404, false, "something wrong. try again");
     }
   } catch (err) {
     console.log(err);
@@ -56,15 +47,9 @@ module.exports.deleteTask = async (req, res, next) => {
 
     const result = await Task.deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount > 0) {
-      return res.status(200).json({
-        status: true,
-        message: "task delete successfully",
-        result: result,
-      });
+      return sendResponse(res, 200, true, "task delete successfully", result);
     } else {
-      return res
-        .status(500)
-        .json({ status: false, message: "something wrong. try again" });
+      return sendResponse(res, 404, false, "something wrong. try again");
     }
   } catch (err) {
     console.log(err);
@@ -78,15 +63,9 @@ module.exports.updateTask = async (req, res, next) => {
     const { id } = req.params;
     const result = await Task.updateOne({ _id: id }, data);
     if (result.acknowledged) {
-      return res.status(200).json({
-        status: true,
-        message: "task update successfully",
-        result: result,
-      });
+      return sendResponse(res, 200, true, "task update successfully", result);
     } else {
-      return res
-        .status(400)
-        .json({ status: false, message: "something wrong. try again" });
+      return sendResponse(res, 404, false, "something wrong. try again");
     }
   } catch (err) {
     console.log(err);
@@ -103,7 +82,7 @@ module.exports.completeTask = async (req, res, next) => {
     const task = await Task.findOne({ _id: id });
 
     if (task.complete) {
-      return res.json({ status: true, message: "Task already completed" });
+      return sendResponse(res, 404, false, "Task already completed");
     }
 
     const result = await Task.updateOne(
@@ -112,23 +91,18 @@ module.exports.completeTask = async (req, res, next) => {
     );
 
     if (result.acknowledged) {
-      return res.status(200).json({
-        status: true,
-        message: "Task updated successfully",
-        result: result,
-      });
+      return sendResponse(
+        res,
+        200,
+        true,
+        "Task completed successfully",
+        result
+      );
     } else {
-      return res.status(404).json({
-        status: false,
-        message: "something wrong try again.",
-      });
+      sendResponse(res, 404, false, "something wrong. try again");
     }
   } catch (error) {
-    console.error("Error completing task:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    console.error(error);
+    next();
   }
 };

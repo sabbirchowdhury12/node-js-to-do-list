@@ -73,6 +73,5 @@ http://localhost:5000/
 - implement the funtionality of the task
 - error handling
 - clean code
-- testing
 
 I started the project and divided the project into some parts. And I complete these parts one after another.
